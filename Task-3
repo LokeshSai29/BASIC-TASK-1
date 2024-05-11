@@ -1,0 +1,46 @@
+from cryptography.fernet import Fernet
+from PIL import Image
+import io
+
+def generate_key():
+    return Fernet.generate_key()
+
+def encrypt_image(image_data, key):
+    cipher = Fernet(key)
+    encrypted_data = cipher.encrypt(image_data)
+    return encrypted_data
+
+def decrypt_image(encrypted_data, key):
+    cipher = Fernet(key)
+    decrypted_data = cipher.decrypt(encrypted_data)
+    return decrypted_data
+
+def main():
+    # Step 1: Generate a key
+    key = generate_key()
+
+    # Step 2: Load and process the image
+    image_path = 'input_image.jpg'
+    with Image.open(image_path) as img:
+        img_byte_array = io.BytesIO()
+        img.save(img_byte_array, format='JPEG')
+        img_byte_array = img_byte_array.getvalue()
+
+    # Step 3: Encrypt the image
+    encrypted_image_data = encrypt_image(img_byte_array, key)
+
+    # Step 4: Save encrypted image
+    with open('encrypted_image.enc', 'wb') as encrypted_file:
+        encrypted_file.write(encrypted_image_data)
+
+    # Step 5: Decrypt the image
+    with open('encrypted_image.enc', 'rb') as encrypted_file:
+        encrypted_data = encrypted_file.read()
+    decrypted_image_data = decrypt_image(encrypted_data, key)
+
+    # Step 6: Display decrypted image
+    decrypted_image = Image.open(io.BytesIO(decrypted_image_data))
+    decrypted_image.show()
+
+if __name__ == "__main__":
+    main()
